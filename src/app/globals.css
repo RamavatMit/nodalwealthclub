@@ -1,26 +1,1230 @@
 @import "tailwindcss";
 
+/* ------------------------------------------------------------------
+   Nodal Wealth Club design tokens
+   Beige backgrounds, logo-green highlights. Dark ink only for text.
+   ------------------------------------------------------------------ */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --ivory: #f6f2eb;
+  --paper: #fbf9f5;
+  --sand: #e7ded0;
+  --line: #d8cfc1;
+  --ink: #1f2421;
+  --ink-muted: #5e625c;
+  --forest: #1b7a52; /* deep logo green: buttons, accents, active states */
+  --mint: #8ccbae; /* soft green: highlights, glows, AI accents */
+  --linen: #efe7da; /* pale beige band (all backgrounds stay beige) */
+  --emerald: #24a06b; /* bright logo green: badges, small dots */
+  --jade: #2f8f5f; /* success, charts */
+
+  --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
+  --ease-in-out-quart: cubic-bezier(0.76, 0, 0.24, 1);
+
+  color-scheme: light;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-ivory: var(--ivory);
+  --color-paper: var(--paper);
+  --color-sand: var(--sand);
+  --color-line: var(--line);
+  --color-ink: var(--ink);
+  --color-ink-muted: var(--ink-muted);
+  --color-forest: var(--forest);
+  --color-mint: var(--mint);
+  --color-linen: var(--linen);
+  --color-emerald: var(--emerald);
+  --color-jade: var(--jade);
+
+  --font-sans: var(--font-geist), "Inter Tight", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: var(--font-instrument-serif), "Times New Roman", serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+
+  --radius-xs: 2px;
+  --radius-sm: 3px;
+  --radius-md: 4px;
+
+  --ease-out-quart: var(--ease-out-quart);
+  --ease-in-out-quart: var(--ease-in-out-quart);
+
+  --text-hero: clamp(2.75rem, 1.6rem + 5vw, 5.5rem);
+  --text-hero--line-height: 1;
+  --text-section: clamp(2rem, 1.6rem + 1.6vw, 2.75rem);
+  --text-section--line-height: 1.08;
+
+  --animate-marquee: marquee var(--marquee-duration, 32s) linear infinite;
+  --animate-spin-slow: spin 18s linear infinite;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@keyframes marquee {
+  to {
+    transform: translate3d(-50%, 0, 0);
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@layer base {
+  html {
+    background: var(--ivory);
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    background: var(--ivory);
+    color: var(--ink);
+    font-family: var(--font-sans);
+    font-size: 1rem;
+    line-height: 1.65;
+    text-rendering: optimizeLegibility;
+  }
+  @media (min-width: 768px) {
+    body {
+      font-size: 1.0625rem;
+    }
+  }
+  ::selection {
+    background: var(--mint);
+    color: var(--ink);
+  }
+  :focus-visible {
+    outline: 2px solid var(--forest);
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+  h1,
+  h2,
+  h3 {
+    text-wrap: balance;
+  }
+  p {
+    text-wrap: pretty;
+  }
+}
+
+@layer components {
+  /* Editorial serif headline; <em> is the one italic accent word. */
+  .display {
+    font-family: var(--font-serif);
+    font-weight: 400;
+    letter-spacing: -0.015em;
+  }
+  .display em {
+    font-style: italic;
+  }
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+  }
+  /* Forma-style framing: thin vertical rules either side of the content column. */
+  .frame {
+    position: relative;
+    margin-inline: auto;
+    width: 100%;
+    max-width: 1320px;
+    border-inline: 1px solid var(--line);
+  }
+  .gutter {
+    padding-inline: 1rem;
+  }
+  @media (min-width: 768px) {
+    .gutter {
+      padding-inline: 2.5rem;
+    }
+  }
+}
+
+/* ------------------------------------------------------------------
+   Route transitions (React <ViewTransition>) — slideshow style:
+   the old page slides out and scales to 0.98, the new one slides in.
+   ------------------------------------------------------------------ */
+::view-transition {
+  pointer-events: none;
+}
+
+::view-transition-old(.page-forward) {
+  animation: 520ms var(--ease-in-out-quart) both page-out-left;
+}
+::view-transition-new(.page-forward) {
+  animation: 620ms var(--ease-in-out-quart) both page-in-right;
+}
+::view-transition-old(.page-back) {
+  animation: 520ms var(--ease-in-out-quart) both page-out-right;
+}
+::view-transition-new(.page-back) {
+  animation: 620ms var(--ease-in-out-quart) both page-in-left;
+}
+
+@keyframes page-out-left {
+  to {
+    transform: translateX(-8%) scale(0.98);
+    opacity: 0;
+  }
+}
+@keyframes page-out-right {
+  to {
+    transform: translateX(8%) scale(0.98);
+    opacity: 0;
+  }
+}
+@keyframes page-in-right {
+  from {
+    transform: translateX(14%) scale(0.98);
+    opacity: 0;
+  }
+}
+@keyframes page-in-left {
+  from {
+    transform: translateX(-14%) scale(0.98);
+    opacity: 0;
+  }
+}
+
+/* Detail pages: the new page rises from the bottom like a sheet while the
+   current one settles back; returning reverses it. */
+::view-transition-old(.page-up) {
+  animation: 700ms var(--ease-in-out-quart) both page-settle;
+}
+::view-transition-new(.page-up) {
+  animation: 760ms var(--ease-in-out-quart) both page-rise;
+}
+::view-transition-old(.page-down) {
+  z-index: 2;
+  animation: 640ms var(--ease-in-out-quart) both page-drop;
+}
+::view-transition-new(.page-down) {
+  z-index: 1;
+  animation: 700ms var(--ease-in-out-quart) both page-unsettle;
+}
+
+@keyframes page-rise {
+  from {
+    transform: translateY(100%);
+    box-shadow: 0 -24px 60px rgb(31 36 33 / 0.12);
+  }
+  to {
+    transform: translateY(0);
+    box-shadow: 0 -24px 60px rgb(31 36 33 / 0);
+  }
+}
+@keyframes page-settle {
+  to {
+    transform: translateY(-4%) scale(0.94);
+    opacity: 0.4;
+    filter: blur(2px);
+  }
+}
+@keyframes page-drop {
+  to {
+    transform: translateY(100%);
+  }
+}
+@keyframes page-unsettle {
+  from {
+    transform: translateY(-4%) scale(0.94);
+    opacity: 0.4;
+  }
+}
+
+/* ------------------------------------------------------------------
+   Card → page morph ("page-open" / "page-close").
+   The clicked card is a shared element (share="card-morph"): the browser
+   flies it from its spot in the grid to the hero of the new page while the
+   rest of the old page sinks back and the new page settles in around it.
+   Only longhands are set on the group so the UA's own position/size
+   animation is kept.
+   ------------------------------------------------------------------ */
+::view-transition-group(.card-morph),
+::view-transition-group(.card-morph-close) {
+  animation-duration: 820ms;
+  animation-timing-function: cubic-bezier(0.83, 0, 0.17, 1);
+  z-index: 50;
+  overflow: clip;
+  border-radius: 4px;
+}
+::view-transition-image-pair(.card-morph),
+::view-transition-image-pair(.card-morph-close) {
+  isolation: isolate;
+}
+/* Both snapshots fill the flying box from its top-left, so the new page's
+   hero reads like a miniature that unfolds to full size. */
+::view-transition-old(.card-morph),
+::view-transition-new(.card-morph),
+::view-transition-old(.card-morph-close),
+::view-transition-new(.card-morph-close) {
+  height: 100%;
+  width: 100%;
+  object-fit: cover;
+  object-position: top left;
+  mix-blend-mode: normal;
+}
+::view-transition-old(.card-morph) {
+  animation: 300ms ease-out both morph-fade-out;
+}
+::view-transition-new(.card-morph) {
+  animation: 520ms cubic-bezier(0.25, 1, 0.5, 1) 120ms both morph-fade-in;
+}
+
+/* Closing: keep the page's own snapshot while it shrinks, and let the card
+   appear only near the end, so the card's text is never shown enlarged. */
+::view-transition-old(.card-morph-close) {
+  animation: 480ms ease-in 300ms both morph-fade-out;
+}
+::view-transition-new(.card-morph-close) {
+  animation: 320ms ease-out 500ms both morph-fade-in;
+}
+
+/* Rest of the page while the card flies */
+::view-transition-old(.page-open) {
+  animation: 600ms cubic-bezier(0.25, 1, 0.5, 1) both page-recede;
+}
+::view-transition-new(.page-open) {
+  animation: 600ms cubic-bezier(0.25, 1, 0.5, 1) 380ms both page-arrive;
+}
+::view-transition-old(.page-close) {
+  animation: 380ms ease-out both morph-fade-out;
+}
+::view-transition-new(.page-close) {
+  animation: 700ms cubic-bezier(0.25, 1, 0.5, 1) 120ms both page-return;
+}
+
+@keyframes morph-fade-out {
+  to {
+    opacity: 0;
+  }
+}
+@keyframes morph-fade-in {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes page-recede {
+  to {
+    opacity: 0;
+    transform: scale(0.94);
+    filter: blur(6px);
+  }
+}
+@keyframes page-arrive {
+  from {
+    opacity: 0;
+    transform: translateY(32px);
+  }
+}
+@keyframes page-return {
+  from {
+    opacity: 0;
+    transform: scale(0.94);
+    filter: blur(6px);
+  }
+}
+
+/* The header stays anchored while pages slide underneath. */
+::view-transition-group(site-header) {
+  animation: none;
+  z-index: 100;
+}
+::view-transition-old(site-header) {
+  display: none;
+}
+::view-transition-new(site-header) {
+  animation: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(*),
+  ::view-transition-new(*),
+  ::view-transition-group(*) {
+    animation-duration: 0s !important;
+    animation-delay: 0s !important;
+  }
+  html {
+    scroll-behavior: auto !important;
+  }
+  .animate-marquee,
+  .animate-spin-slow {
+    animation: none !important;
+  }
+}
+
+/* Lenis smooth scroll */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+.lenis:not(.lenis-autoToggle).lenis-stopped {
+  overflow: clip;
+}
+.lenis [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+
+/* ------------------------------------------------------------------
+   First-visit intro (src/components/motion/intro.tsx)
+   ------------------------------------------------------------------ */
+/* Total runtime: 1.6 s. Lines draw 0–0.7 s, nodes pop 0.3–0.8 s,
+   panels lift 0.85–1.6 s, overlay removed at 1.6 s. */
+
+.site-intro {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: none;
+  pointer-events: none;
+  animation: intro-out 0s linear 1.85s forwards;
+}
+
+html[data-intro="play"] .site-intro {
+  display: block;
+}
+
+.site-intro-panel {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: calc(var(--i) * 25%);
+  width: calc(25% + 1px);
+  background: var(--ivory);
+  border-right: 1px solid var(--line);
+  animation: panel-lift 0.7s cubic-bezier(0.76, 0, 0.24, 1) calc(1.1s + var(--i) * 0.05s) forwards;
+}
+
+.site-intro-mark {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  animation: mark-out 0.35s ease-in 1s forwards;
+}
+
+.site-intro-word {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+  opacity: 0;
+  animation: fade-in 0.4s ease-out 0.25s forwards;
+}
+
+.site-intro-skip {
+  position: absolute;
+  right: 1rem;
+  bottom: 1rem;
+  pointer-events: auto;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--line);
+  border-radius: 2px;
+  background: var(--paper);
+  cursor: pointer;
+  animation: fade-out 0.2s linear 0.8s forwards;
+}
+
+@keyframes draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+@keyframes pop {
+  to {
+    transform: scale(1);
+  }
+}
+@keyframes fade-in {
+  to {
+    opacity: 1;
+  }
+}
+@keyframes fade-out {
+  to {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+@keyframes mark-out {
+  to {
+    opacity: 0;
+    transform: translateY(-12px);
+  }
+}
+@keyframes panel-lift {
+  to {
+    transform: translateY(-101%);
+  }
+}
+@keyframes intro-out {
+  to {
+    visibility: hidden;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .site-intro {
+    display: none !important;
+  }
+}
+
+/* Pointer spotlight on cards (see components/motion/pointer-effects.tsx) */
+[data-spotlight] {
+  position: relative;
+  isolation: isolate;
+}
+[data-spotlight]::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 300ms ease;
+  background: radial-gradient(
+    380px circle at var(--mx, 50%) var(--my, 50%),
+    rgb(140 203 174 / 0.32),
+    transparent 65%
+  );
+}
+[data-spotlight]:hover::before {
+  opacity: 1;
+}
+
+/* 3D tilt cards: glare follows the pointer (pointer-effects.tsx) */
+[data-tilt] {
+  position: relative;
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+[data-tilt]::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  opacity: 0;
+  transition: opacity 300ms ease;
+  background: radial-gradient(
+    circle at var(--gx, 50%) var(--gy, 50%),
+    rgb(255 255 255 / 0.55),
+    transparent 55%
+  );
+  mix-blend-mode: soft-light;
+}
+[data-tilt][data-tilting]::after {
+  opacity: 1;
+}
+
+/* Long-form legal / article text */
+.legal-prose {
+  max-width: 68ch;
+  color: var(--ink);
+}
+.legal-prose h2 {
+  font-family: var(--font-serif);
+  font-size: 1.75rem;
+  line-height: 1.2;
+  margin-top: 2.75rem;
+  margin-bottom: 0.75rem;
+}
+.legal-prose p,
+.legal-prose ul {
+  margin-bottom: 1rem;
+  color: var(--ink-muted);
+}
+.legal-prose ul {
+  list-style: disc;
+  padding-left: 1.25rem;
+}
+.legal-prose li {
+  margin-bottom: 0.4rem;
+}
+.legal-prose strong {
+  color: var(--ink);
+  font-weight: 500;
+}
+.legal-prose a {
+  color: var(--forest);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* ------------------------------------------------------------------
+   Home cinematic intro (src/components/home/cinematic-intro.tsx)
+   Timeline, seconds: dot 0–.45 · line 1 .4–1.9 · highlight 1.45–1.85
+   · line 2 1.95–2.9 · bloom 2.8–3.6 · line 3 3.15–4.4 · mark 4.45–5.1
+   · lift 5.15–5.7
+   ------------------------------------------------------------------ */
+.cin {
+  position: fixed;
+  inset: 0;
+  z-index: 210;
+  display: none;
+  background: var(--ivory);
+  animation: cin-lift 0.6s cubic-bezier(0.76, 0, 0.24, 1) 5.5s forwards;
+}
+html[data-intro="cinema"] .cin {
+  display: block;
+}
+.cin-stage {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+}
+.cin-stage > * {
+  grid-area: 1 / 1;
+}
+.cin-line {
+  position: relative;
+  margin: 0;
+  padding: 0 1rem;
+  text-align: center;
+  font-family: var(--font-serif);
+  font-size: clamp(2.4rem, 1.4rem + 5vw, 5.5rem);
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+}
+.cin-mask {
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: bottom;
+  padding: 0 0.12em 0.12em;
+  margin-bottom: -0.12em;
+}
+.cin-word {
+  display: inline-block;
+  transform: translateY(110%);
+  animation: cin-rise 0.7s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+}
+.cin-accent {
+  position: relative;
+  z-index: 1;
+}
+.cin-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 999px;
+  background: var(--forest);
+  transform: scale(0);
+  animation:
+    cin-pop 0.45s cubic-bezier(0.25, 1, 0.5, 1) forwards,
+    cin-out 0.25s ease-in 0.5s forwards;
+}
+.cin-line-1 {
+  animation: cin-out-blur 0.3s ease-in 1.9s forwards;
+}
+/* Sage block sweeps behind the italic word, like a selection highlight. */
+.cin-accent-wrap {
+  position: relative;
+  display: inline-block;
+}
+.cin-highlight {
+  position: absolute;
+  inset: 0.12em -0.06em 0.02em;
+  z-index: 0;
+  background: var(--mint);
+  transform: scaleX(0);
+  transform-origin: left;
+  animation: cin-sweep 0.4s cubic-bezier(0.65, 0, 0.35, 1) 1.45s forwards;
+}
+.cin-line-2 {
+  animation: cin-out-blur 0.3s ease-in 2.75s forwards;
+}
+.cin-bloom {
+  width: 60vmax;
+  height: 60vmax;
+  border-radius: 999px;
+  background: radial-gradient(circle, var(--linen) 0%, var(--mint) 45%, transparent 70%);
+  filter: blur(40px);
+  transform: translateY(70vh) scale(0.2);
+  opacity: 0;
+  animation: cin-bloom 1.1s cubic-bezier(0.65, 0, 0.35, 1) 2.7s forwards;
+}
+.cin-line-3 {
+  opacity: 0;
+  filter: blur(18px);
+  letter-spacing: 0.12em;
+  animation:
+    cin-focus 0.9s cubic-bezier(0.25, 1, 0.5, 1) 3.15s forwards,
+    cin-out-blur 0.3s ease-in 4.2s forwards;
+}
+.cin-mark {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.9rem;
+}
+.cin-wordmark {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+  opacity: 0;
+  animation: cin-in 0.4s ease-out 4.8s forwards;
+}
+.cin-progress {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 2px;
+  width: 100%;
+  background: var(--forest);
+  transform: scaleX(0);
+  transform-origin: left;
+  animation: cin-progress 5.5s linear forwards;
+}
+.cin-skip {
+  position: absolute;
+  right: 1rem;
+  bottom: 1rem;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--line);
+  border-radius: 2px;
+  background: var(--paper);
+  cursor: pointer;
+}
+
+@keyframes cin-rise {
+  to {
+    transform: translateY(0);
+  }
+}
+@keyframes cin-pop {
+  to {
+    transform: scale(1);
+  }
+}
+@keyframes cin-out {
+  to {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+}
+@keyframes cin-out-blur {
+  to {
+    opacity: 0;
+    filter: blur(10px);
+    transform: translateY(-12px);
+  }
+}
+@keyframes cin-sweep {
+  to {
+    transform: scaleX(1);
+  }
+}
+@keyframes cin-bloom {
+  0% {
+    opacity: 0;
+    transform: translateY(70vh) scale(0.2);
+  }
+  55% {
+    opacity: 0.9;
+    transform: translateY(0) scale(1.4);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-10vh) scale(2.4);
+  }
+}
+@keyframes cin-focus {
+  to {
+    opacity: 1;
+    filter: blur(0);
+    letter-spacing: -0.02em;
+  }
+}
+@keyframes cin-draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+@keyframes cin-in {
+  to {
+    opacity: 1;
+  }
+}
+@keyframes cin-progress {
+  to {
+    transform: scaleX(1);
+  }
+}
+@keyframes cin-lift {
+  to {
+    transform: translateY(-100%);
+    visibility: hidden;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cin {
+    display: none !important;
+  }
+}
+
+/* Home hero: autoplay progress on the active world tab */
+.hero-progress {
+  animation-name: hero-progress;
+  animation-timing-function: linear;
+  animation-fill-mode: forwards;
+}
+html[data-intro="film"] .hero-progress,
+html[data-intro="cinema"] .hero-progress,
+html[data-intro="play"] .hero-progress {
+  animation-play-state: paused;
+}
+@keyframes hero-progress {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero-progress {
+    animation: none;
+    transform: scaleX(1);
+  }
+}
+
+/* ------------------------------------------------------------------
+   Project intro / showreel (/intro, components/intro/showreel.tsx)
+   Every scene is CSS-animated so the whole film pauses with one rule.
+   ------------------------------------------------------------------ */
+.sr-paused,
+.sr-paused * {
+  animation-play-state: paused !important;
+}
+.sr-leave {
+  animation: sr-leave 0.55s cubic-bezier(0.76, 0, 0.24, 1) forwards;
+}
+@keyframes sr-leave {
+  to {
+    opacity: 0;
+    filter: blur(14px);
+    transform: scale(1.04);
+  }
+}
+@keyframes sr-rise {
+  from {
+    transform: translateY(110%);
+  }
+}
+@keyframes sr-fade {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes sr-up {
+  from {
+    opacity: 0;
+    transform: translateY(28px);
+  }
+}
+@keyframes sr-blur {
+  from {
+    opacity: 0;
+    filter: blur(18px);
+    letter-spacing: 0.12em;
+  }
+}
+@keyframes sr-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+}
+@keyframes sr-draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+@keyframes sr-grow-x {
+  from {
+    transform: scaleX(0);
+  }
+}
+@keyframes sr-grow-y {
+  from {
+    transform: scaleY(0);
+  }
+}
+@keyframes sr-travel {
+  from {
+    left: 0%;
+  }
+  to {
+    left: 100%;
+  }
+}
+@keyframes sr-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes sr-drift {
+  0%,
+  100% {
+    transform: translate(0, 0) rotate(var(--r, 0deg));
+  }
+  50% {
+    transform: translate(var(--dx, 12px), var(--dy, -10px)) rotate(calc(var(--r, 0deg) * -1));
+  }
+}
+@keyframes sr-collapse {
+  to {
+    opacity: 0;
+    transform: translate(var(--cx, 0), var(--cy, 0)) scale(0.1);
+  }
+}
+@keyframes sr-light {
+  to {
+    background: var(--forest);
+    color: var(--paper);
+    border-color: var(--forest);
+  }
+}
+@keyframes sr-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgb(140 203 174 / 0.6);
+  }
+  50% {
+    box-shadow: 0 0 0 14px rgb(140 203 174 / 0);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sr-stage * {
+    animation-duration: 1ms !important;
+    animation-delay: 0s !important;
+    animation-iteration-count: 1 !important;
+  }
+}
+
+/* ------------------------------------------------------------------
+   Intro film (components/intro/intro-film.tsx)
+   Full screen, above everything (header included). On Home it shows only
+   while <html data-intro="film"> (first visit); on /intro always.
+   ------------------------------------------------------------------ */
+.film {
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  display: none;
+  background: var(--ivory);
+  color: var(--ink);
+}
+html[data-intro="film"] .film,
+.film.film-page {
+  display: block;
+}
+html[data-intro="film"] {
+  overflow: hidden;
+}
+.film-exit {
+  animation: film-exit 0.9s cubic-bezier(0.76, 0, 0.24, 1) forwards;
+}
+@keyframes film-exit {
+  to {
+    transform: translateY(-100%);
+  }
+}
+.film-boot {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: var(--forest);
+  animation: sr-fade 0.6s ease both;
+}
+.film-player {
+  position: absolute;
+  inset: 0;
+  background: var(--ivory);
+}
+.film-picture {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  cursor: pointer;
+}
+/* Faint grid, as on the rest of the site */
+.film-picture::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  opacity: 0.45;
+  background-image:
+    linear-gradient(var(--line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--line) 1px, transparent 1px);
+  background-size: 96px 96px;
+  mask-image: radial-gradient(70% 60% at 50% 50%, black, transparent);
+}
+/* Each scene drifts in slowly, like a camera push-in. */
+.film-scene {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 5rem 1rem 6.5rem;
+  animation-name: film-push;
+  animation-timing-function: linear;
+  animation-fill-mode: both;
+  cursor: auto;
+}
+@keyframes film-push {
+  from {
+    transform: scale(1);
+  }
+  to {
+    transform: scale(1.045);
+  }
+}
+/* Cut transitions: a sand panel with a mint leading edge sweeps across. */
+.film-wipe {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  pointer-events: none;
+  background: var(--sand);
+}
+.film-wipe::after {
+  content: "";
+  position: absolute;
+  background: var(--mint);
+  box-shadow: 0 0 30px 6px rgb(140 203 174 / 0.7);
+}
+.film-wipe-x {
+  animation: film-wipe-x 0.95s cubic-bezier(0.76, 0, 0.24, 1) both;
+}
+.film-wipe-x::after {
+  top: 0;
+  bottom: 0;
+  right: -2px;
+  width: 3px;
+}
+.film-wipe-y {
+  animation: film-wipe-y 0.95s cubic-bezier(0.76, 0, 0.24, 1) both;
+}
+.film-wipe-y::after {
+  left: 0;
+  right: 0;
+  top: -2px;
+  height: 3px;
+}
+@keyframes film-wipe-x {
+  0% {
+    transform: translateX(-101%);
+  }
+  45%,
+  55% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(101%);
+  }
+}
+@keyframes film-wipe-y {
+  0% {
+    transform: translateY(101%);
+  }
+  45%,
+  55% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(-101%);
+  }
+}
+.film-vignette {
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  pointer-events: none;
+  background: radial-gradient(120% 90% at 50% 50%, transparent 55%, rgb(31 36 33 / 0.1));
+}
+/* Film grain: fractal noise that shifts a few pixels per frame. */
+.film-grain {
+  position: absolute;
+  inset: -50%;
+  z-index: 7;
+  pointer-events: none;
+  opacity: 0.06;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  animation: film-grain 0.6s steps(3) infinite;
+}
+@keyframes film-grain {
+  0% {
+    transform: translate(0, 0);
+  }
+  33% {
+    transform: translate(-4%, 3%);
+  }
+  66% {
+    transform: translate(3%, -4%);
+  }
+  100% {
+    transform: translate(0, 0);
+  }
+}
+/* Player chrome */
+.film-top,
+.film-bottom {
+  position: absolute;
+  left: 0;
+  right: 0;
+  z-index: 10;
+  padding: 1rem clamp(1rem, 3vw, 2.5rem);
+  transition:
+    opacity 400ms ease,
+    transform 400ms ease;
+}
+.film-top {
+  top: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: var(--forest);
+  background: linear-gradient(var(--ivory), transparent);
+}
+.film-bottom {
+  bottom: 0;
+  background: linear-gradient(transparent, var(--ivory) 45%);
+  padding-top: 2.5rem;
+}
+.film-chrome-hidden.film-bottom {
+  opacity: 0;
+  transform: translateY(10px);
+}
+/* Skip stays visible even when the rest of the chrome hides. */
+.film-chrome-hidden.film-top > :first-child {
+  opacity: 0;
+  transition: opacity 400ms ease;
+}
+.film-skip {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  padding: 0.55rem 0.85rem;
+  border: 1px solid var(--line);
+  border-radius: 2px;
+  background: var(--paper);
+  color: var(--ink);
+  cursor: pointer;
+  transition: border-color 200ms ease;
+}
+.film-skip:hover {
+  border-color: var(--forest);
+}
+.film-btn {
+  display: grid;
+  place-items: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border: 1px solid var(--line);
+  border-radius: 2px;
+  background: var(--paper);
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: border-color 200ms ease;
+}
+.film-btn:hover {
+  border-color: var(--forest);
+}
+.film-flash {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  z-index: 9;
+  display: grid;
+  place-items: center;
+  width: 4.5rem;
+  height: 4.5rem;
+  margin: -2.25rem 0 0 -2.25rem;
+  border-radius: 999px;
+  background: rgb(31 36 33 / 0.55);
+  color: var(--paper);
+  font-size: 1.2rem;
+  pointer-events: none;
+  animation: film-flash 0.7s ease-out forwards;
+}
+@keyframes film-flash {
+  from {
+    opacity: 1;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 0;
+    transform: scale(1.4);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .film-scene,
+  .film-grain,
+  .film-wipe,
+  .film-flash {
+    animation: none !important;
+  }
+  .film-wipe,
+  .film-flash {
+    display: none;
+  }
+}
+
+/* ------------------------------------------------------------------
+   Nodal mark build animation (components/ui/logo.tsx, animated mode):
+   top node → left node → right node pop in, the web fills, then the green
+   node drops in with a small bounce. --logo-delay offsets the sequence.
+   ------------------------------------------------------------------ */
+.logo-animate .logo-n1,
+.logo-animate .logo-n2,
+.logo-animate .logo-n3,
+.logo-animate .logo-dot {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+.logo-animate .logo-n1 {
+  animation: logo-pop 0.42s cubic-bezier(0.34, 1.56, 0.64, 1) calc(var(--logo-delay, 0s) + 0s) both;
+}
+.logo-animate .logo-n2 {
+  animation: logo-pop 0.42s cubic-bezier(0.34, 1.56, 0.64, 1) calc(var(--logo-delay, 0s) + 0.1s) both;
+}
+.logo-animate .logo-n3 {
+  animation: logo-pop 0.42s cubic-bezier(0.34, 1.56, 0.64, 1) calc(var(--logo-delay, 0s) + 0.2s) both;
+}
+.logo-animate .logo-web {
+  animation: logo-fade 0.35s ease-out calc(var(--logo-delay, 0s) + 0.3s) both;
+}
+.logo-animate .logo-dot {
+  animation: logo-drop 0.55s cubic-bezier(0.34, 1.56, 0.64, 1) calc(var(--logo-delay, 0s) + 0.42s) both;
+}
+@keyframes logo-pop {
+  from {
+    transform: scale(0);
+  }
+}
+@keyframes logo-fade {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes logo-drop {
+  from {
+    opacity: 0;
+    transform: translateY(-90%) scale(0.6);
+  }
 }

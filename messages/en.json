@@ -1,0 +1,38 @@
+{
+  "nav": {
+    "home": "Home",
+    "ai": "AI",
+    "web3": "Web3",
+    "products": "Products",
+    "about": "About",
+    "membership": "Membership",
+    "join": "Join the Club",
+    "login": "Log in",
+    "menu": "Menu",
+    "close": "Close",
+    "skip": "Skip to content"
+  },
+  "footer": {
+    "tagline": "Understand the new money before it arrives.",
+    "learn": "Learn",
+    "club": "Club",
+    "company": "Company",
+    "legal": "Legal",
+    "disclaimer": "Education only, not investment advice. Nodal Wealth Club is not registered with SEBI as an investment adviser or research analyst. Nothing on this site is a recommendation to buy, sell or hold any security, crypto asset or token. Crypto assets are unregulated in India and can lose all value. Do your own research and consult a registered professional.",
+    "security": "We will never ask for your seed phrase, private key or for you to sign a transaction.",
+    "rights": "Nodal Wealth Club. All rights reserved."
+  },
+  "newsletter": {
+    "title": "The Sunday Node",
+    "body": "One calm email a week: what changed in AI and Web3, explained for India. No tips, no hype.",
+    "placeholder": "you@example.com",
+    "consent": "I agree to receive the weekly newsletter. I can unsubscribe any time.",
+    "submit": "Subscribe",
+    "success": "Thanks! Email sign-ups go live at launch — this form is a preview on the staging site.",
+    "error": "Something went wrong. Please try again.",
+    "rateLimited": "Too many attempts. Please wait a few minutes."
+  },
+  "intro": {
+    "skip": "Skip intro"
+  }
+}

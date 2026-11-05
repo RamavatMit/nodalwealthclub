@@ -1,0 +1,5 @@
+# Keep LF line endings in the repo (shell scripts and configs run on the Linux VPS).
+* text=auto eol=lf
+*.png binary
+*.jpg binary
+*.ico binary

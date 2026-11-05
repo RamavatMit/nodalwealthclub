@@ -1,0 +1,50 @@
+# Reverse proxy in front of the Next.js app.
+# TLS: Cloudflare (Full strict) → Caddy using a Cloudflare Origin Certificate.
+# The VPS firewall only accepts 80/443 from Cloudflare IP ranges (security/firewall).
+
+{
+	admin off
+	servers {
+		protocols h1 h2
+		# Trust Cloudflare as the only proxy so client IPs are correct.
+		trusted_proxies static 173.245.48.0/20 103.21.244.0/22 103.22.200.0/22 103.31.4.0/22 141.101.64.0/18 108.162.192.0/18 190.93.240.0/20 188.114.96.0/20 197.234.240.0/22 198.41.128.0/17 162.158.0.0/15 104.16.0.0/13 104.24.0.0/14 172.64.0.0/13 131.0.72.0/22
+		client_ip_headers CF-Connecting-IP
+	}
+}
+
+{$SITE_DOMAIN:nodalwealthclub.example}, www.{$SITE_DOMAIN:nodalwealthclub.example} {
+	tls /etc/caddy/certs/origin.pem /etc/caddy/certs/origin.key {
+		protocols tls1.3
+	}
+
+	@www host www.{$SITE_DOMAIN:nodalwealthclub.example}
+	redir @www https://{$SITE_DOMAIN:nodalwealthclub.example}{uri} permanent
+
+	request_body {
+		max_size 1MB
+	}
+
+	encode zstd gzip
+
+	header {
+		-Server
+		-X-Powered-By
+		Strict-Transport-Security "max-age=63072000; includeSubDomains; preload"
+		X-Content-Type-Options "nosniff"
+		X-Frame-Options "DENY"
+		Referrer-Policy "strict-origin-when-cross-origin"
+	}
+
+	# Immutable build assets
+	@static path /_next/static/*
+	header @static Cache-Control "public, max-age=31536000, immutable"
+
+	reverse_proxy web:3000 {
+		header_up X-Real-IP {client_ip}
+	}
+
+	log {
+		output stdout
+		format json
+	}
+}
