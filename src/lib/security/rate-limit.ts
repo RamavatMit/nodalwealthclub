@@ -51,6 +51,9 @@ return { added, count, oldest[2] or tostring(now) }
 
 let redis: Redis | null | undefined;
 
+/** Fallback salt when RATE_LIMIT_SALT is unset: random, never written anywhere. */
+const processSalt = crypto.randomUUID();
+
 function getRedis(): Redis | null {
   if (redis !== undefined) return redis;
   const { REDIS_URL: url, RATE_LIMIT_STORE } = getEnv();
@@ -119,7 +122,7 @@ export async function clientKey(headers: Headers): Promise<string> {
     headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
     headers.get("x-real-ip") ??
     "unknown";
-  const salt = getEnv().RATE_LIMIT_SALT ?? "dev-only-salt";
+  const salt = getEnv().RATE_LIMIT_SALT ?? processSalt;
   const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(`${salt}:${ip}`));
   return Buffer.from(digest).toString("base64url").slice(0, 22);
 }

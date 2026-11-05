@@ -6,45 +6,60 @@ import { z } from "zod";
  *
  * Variables for later phases are optional now and become required in the
  * phase that introduces them.
+ *
+ * Malformed values always fail fast. Missing *operational* settings in
+ * production (shared Redis, a stable rate-limit salt) do not take the site
+ * down: they fall back to safe per-instance defaults and are reported once
+ * as warnings in the server log (see `configWarnings`).
  */
 const isProd = process.env.NODE_ENV === "production";
 
-const schema = z
-  .object({
-    NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
-    SITE_URL: z.url().default("http://localhost:3000"),
+/** On Vercel, the production hostname is provided as a system variable. */
+const vercelUrl = process.env.VERCEL_PROJECT_PRODUCTION_URL
+  ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
+  : undefined;
 
-    // Phase 1
-    REDIS_URL: z.string().startsWith("redis").optional(),
-    /** "memory" is for single-process test runs only (e2e). */
-    RATE_LIMIT_STORE: z.enum(["redis", "memory"]).optional(),
-    RATE_LIMIT_SALT: z.string().min(16).optional(),
+const schema = z.object({
+  NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
+  SITE_URL: z.url().default(vercelUrl ?? "http://localhost:3000"),
 
-    // Phase 2–4 (validated when present)
-    DATABASE_URL: z.string().startsWith("postgres").optional(),
-    FIELD_ENCRYPTION_KEY: z
-      .string()
-      .regex(/^[A-Za-z0-9+/]{43}=$/, "must be 32 bytes, base64")
-      .optional(),
-    AUTH_SECRET: z.string().min(32).optional(),
-    RAZORPAY_KEY_ID: z.string().optional(),
-    RAZORPAY_KEY_SECRET: z.string().optional(),
-    RAZORPAY_WEBHOOK_SECRET: z.string().optional(),
-    TURNSTILE_SECRET_KEY: z.string().optional(),
-    RESEND_API_KEY: z.string().optional(),
-    SENTRY_DSN: z.url().optional(),
-  })
-  .superRefine((env, ctx) => {
-    // Runtime-only requirements; `next build` runs with NODE_ENV=production
-    // but has no access to the production services.
-    if (env.NODE_ENV !== "production" || process.env.NEXT_PHASE === "phase-production-build") return;
-    if (!env.RATE_LIMIT_SALT) {
-      ctx.addIssue({ code: "custom", path: ["RATE_LIMIT_SALT"], message: "required in production" });
-    }
-    if (env.RATE_LIMIT_STORE !== "memory" && !env.REDIS_URL) {
-      ctx.addIssue({ code: "custom", path: ["REDIS_URL"], message: "required in production" });
-    }
-  });
+  // Phase 1
+  /** redis:// or rediss:// (e.g. Upstash on Vercel). */
+  REDIS_URL: z.string().startsWith("redis").optional(),
+  /** "memory" is for single-process test runs only (e2e). */
+  RATE_LIMIT_STORE: z.enum(["redis", "memory"]).optional(),
+  RATE_LIMIT_SALT: z.string().min(16).optional(),
+
+  // Phase 2–4 (validated when present)
+  DATABASE_URL: z.string().startsWith("postgres").optional(),
+  FIELD_ENCRYPTION_KEY: z
+    .string()
+    .regex(/^[A-Za-z0-9+/]{43}=$/, "must be 32 bytes, base64")
+    .optional(),
+  AUTH_SECRET: z.string().min(32).optional(),
+  RAZORPAY_KEY_ID: z.string().optional(),
+  RAZORPAY_KEY_SECRET: z.string().optional(),
+  RAZORPAY_WEBHOOK_SECRET: z.string().optional(),
+  TURNSTILE_SECRET_KEY: z.string().optional(),
+  RESEND_API_KEY: z.string().optional(),
+  SENTRY_DSN: z.url().optional(),
+});
+
+/**
+ * Production settings that are recommended but not fatal when missing.
+ * Returns variable names only, never values.
+ */
+export function configWarnings(env: Env): string[] {
+  if (env.NODE_ENV !== "production" || process.env.NEXT_PHASE === "phase-production-build") return [];
+  const out: string[] = [];
+  if (!env.RATE_LIMIT_SALT) out.push("RATE_LIMIT_SALT not set: using a random per-instance salt");
+  if (env.RATE_LIMIT_STORE !== "memory" && !env.REDIS_URL) {
+    out.push("REDIS_URL not set: rate limits are per instance (in memory), not shared");
+  }
+  if (!process.env.SITE_URL && !vercelUrl)
+    out.push("SITE_URL not set: links and sitemap use http://localhost:3000");
+  return out;
+}
 
 export type Env = z.infer<typeof schema>;
 
@@ -60,7 +75,10 @@ export function getEnv(source: NodeJS.ProcessEnv = process.env): Env {
     // Values are never printed, only names.
     throw new Error(`Invalid environment configuration:\n${issues}`);
   }
-  if (source === process.env) cached = parsed.data;
+  if (source === process.env) {
+    cached = parsed.data;
+    for (const w of configWarnings(parsed.data)) console.warn(`[config] ${w}`);
+  }
   return parsed.data;
 }
 

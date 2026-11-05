@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { getEnv } from "./env";
+import { configWarnings, getEnv } from "./env";
 import { buildCsp, createNonce, staticSecurityHeaders } from "./headers";
 import { checkMemory } from "./rate-limit";
 import { newsletterSchema } from "./schemas";
@@ -75,8 +75,17 @@ describe("env validation", () => {
     expect(() => getEnv({ NODE_ENV: "development" } as NodeJS.ProcessEnv)).not.toThrow();
   });
 
-  it("requires Redis and the rate-limit salt in production", () => {
-    expect(() => getEnv({ NODE_ENV: "production" } as NodeJS.ProcessEnv)).toThrow(/REDIS_URL/);
+  it("starts in production without Redis or a salt, and warns about both", () => {
+    const env = getEnv({ NODE_ENV: "production" } as NodeJS.ProcessEnv);
+    const warnings = configWarnings(env).join(" | ");
+    expect(warnings).toContain("REDIS_URL");
+    expect(warnings).toContain("RATE_LIMIT_SALT");
+  });
+
+  it("still fails fast on malformed production values", () => {
+    expect(() => getEnv({ NODE_ENV: "production", REDIS_URL: "http://nope" } as NodeJS.ProcessEnv)).toThrow(
+      /REDIS_URL/,
+    );
   });
 
   it("rejects a malformed encryption key without printing it", () => {
