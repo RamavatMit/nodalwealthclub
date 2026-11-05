@@ -186,7 +186,7 @@ export function WorldSphere({
       const R1 = Math.hypot(w, h) * 0.62;
       const R = R0 + (R1 - R0) * z;
       const cx = w / 2;
-      const cy0 = h + R0 * 0.6;
+      const cy0 = h + R0 * 0.7;
       const cy = cy0 + (h / 2 - cy0) * z;
       const fade = 1 - z * 0.65;
 

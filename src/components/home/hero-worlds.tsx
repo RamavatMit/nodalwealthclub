@@ -163,7 +163,7 @@ export function HeroWorlds() {
                   <TransitionLink href={W.href} data-magnetic="10" className={buttonClass("primary")}>
                     {W.cta}
                   </TransitionLink>
-                  <TransitionLink href="/membership" data-magnetic="8" className={buttonClass("outline")}>
+                  <TransitionLink href="/membership" data-magnetic="8" className={buttonClass("outline", "bg-paper")}>
                     Join the club
                   </TransitionLink>
                 </div>
